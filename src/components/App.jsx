@@ -1,16 +1,10 @@
+import { InfinitySpin as Loader } from 'react-loader-spinner';
+import { Container } from './App.styled';
+
 export const App = () => {
   return (
-    <div
-      style={{
-        height: '100vh',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        fontSize: 40,
-        color: '#010101'
-      }}
-    >
-      React homework template
-    </div>
+    <Container>
+      <Loader width="200" color="#4fa94d" />
+    </Container>
   );
 };
