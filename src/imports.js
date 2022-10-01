@@ -13,3 +13,7 @@ import styled from 'styled-components';
 // === Formik ===
 
 import { Formik, Form, Field } from 'formik';
+
+// === React component ===
+
+import { Component } from 'react';

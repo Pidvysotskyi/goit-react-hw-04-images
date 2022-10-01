@@ -1,6 +1,6 @@
 import { Formik, Form, Field } from 'formik';
 
-export const Searchbar = () => {
+export const Searchbar = ({ onSearch }) => {
   return (
     <header className="searchbar">
       <Formik
@@ -8,7 +8,7 @@ export const Searchbar = () => {
           searchQuery: '',
         }}
         onSubmit={values => {
-          console.log(values.searchQuery);
+          onSearch(values.searchQuery);
         }}
       >
         <Form className="form">
