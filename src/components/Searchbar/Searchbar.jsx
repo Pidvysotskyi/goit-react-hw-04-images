@@ -7,8 +7,9 @@ export const Searchbar = ({ onSearch }) => {
         initialValues={{
           searchQuery: '',
         }}
-        onSubmit={values => {
+        onSubmit={(values, { resetForm }) => {
           onSearch(values.searchQuery);
+          resetForm();
         }}
       >
         <Form className="form">
