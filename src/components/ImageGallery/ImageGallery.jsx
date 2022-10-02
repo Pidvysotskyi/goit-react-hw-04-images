@@ -1,9 +1,9 @@
 import { ImageGalleryItem } from 'components/ImageGalleryItem/ImageGalleryItem';
+import { Gallery } from './ImageGallery.styled';
 
 export const ImageGallery = ({ images, onClick }) => {
   return (
-    <ul
-      className="gallery"
+    <Gallery
       onClick={event => {
         if (event.target.nodeName !== 'IMG') {
           return;
@@ -21,6 +21,6 @@ export const ImageGallery = ({ images, onClick }) => {
           />
         );
       })}
-    </ul>
+    </Gallery>
   );
 };

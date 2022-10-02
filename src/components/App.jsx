@@ -15,37 +15,58 @@ export class App extends Component {
     images: [],
     isModal: false,
     currentImage: {},
+    error: '',
   };
 
   componentDidUpdate(_, prevState) {
-    const currentQuery = this.state.query;
-    const currentPage = this.state.pageNumber;
+    const { query, pageNumber, isModal } = this.state;
+    const currentQuery = query;
+    const currentPage = pageNumber;
     if (prevState.query !== currentQuery) {
       this.setState({ pageNumber: 1, status: 'pending' });
       getImages(currentQuery, currentPage)
         .then(response => {
+          if (response.length === 0) {
+            return Promise.reject(new Error(`Cannot find ${currentQuery}`));
+          }
           this.setState({ images: response });
         })
-        .finally(() => {
-          this.setState({ status: 'done' });
+        .then(() => {
+          this.setState({ status: 'done', error: '' });
+        })
+        .catch(error => {
+          this.setState({ status: 'error', error: error.message });
         });
-    } else if (prevState.pageNumber !== currentPage) {
+      return;
+    }
+    if (prevState.pageNumber !== currentPage) {
       this.setState({ status: 'pending' });
       getImages(currentQuery, currentPage)
         .then(response => {
+          if (response.length === 0) {
+            return Promise.reject(new Error(`Cannot find ${currentQuery}`));
+          }
           this.setState(prevState => {
             return {
               images: [...prevState.images, ...response],
             };
           });
         })
-        .finally(() => {
+        .then(() => {
           this.setState({ status: 'done' });
+        })
+        .catch(error => {
+          this.setState({ status: 'error', error: error.message });
         });
-    } else if (this.state.isModal) {
+      return;
+    }
+    if (isModal) {
       document.addEventListener('keydown', this.onEscHandle);
-    } else if (!this.state.isModal) {
+      return;
+    }
+    if (!isModal) {
       document.removeEventListener('keydown', this.onEscHandle);
+      return;
     }
   }
 
@@ -77,28 +98,25 @@ export class App extends Component {
   };
 
   render() {
+    const { status, images, isModal, currentImage, error } = this.state;
     return (
       <Container>
         <Searchbar onSearch={this.onSearchHandle} />
-        {this.state.status === 'done' && (
-          <ImageGallery
-            images={this.state.images}
-            onClick={this.onGalleryClickHandle}
-          />
+        {status === 'done' && (
+          <>
+            <ImageGallery images={images} onClick={this.onGalleryClickHandle} />
+            <Button onClick={this.onLoadMoreHandle}>Load more</Button>
+          </>
         )}
-        {this.state.status === 'done' && (
-          <Button onClick={this.onLoadMoreHandle}>Load more</Button>
-        )}
-        {this.state.status === 'pending' && (
-          <Loader width="200" color="#4fa94d" />
-        )}
-        {this.state.isModal && (
+        {status === 'pending' && <Loader width="200" color="#4fa94d" />}
+        {isModal && (
           <Modal
-            imageUrl={this.state.currentImage.largeImageURL}
-            alt={this.state.currentImage.tags}
+            imageUrl={currentImage.largeImageURL}
+            alt={currentImage.tags}
             onCloseModal={this.onCloseModal}
           />
         )}
+        {status === 'error' && <p>{error}</p>}
       </Container>
     );
   }
