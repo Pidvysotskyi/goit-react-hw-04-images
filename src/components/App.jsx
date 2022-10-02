@@ -1,11 +1,12 @@
 import { Component } from 'react';
-import { InfinitySpin as Loader } from 'react-loader-spinner';
 import { Container } from './App.styled';
 import { ImageGallery } from './ImageGallery/ImageGallery';
 import { Searchbar } from './Searchbar/Searchbar';
 import { Button } from './Button/Button';
 import { getImages } from 'utils/getImages';
 import { Modal } from './Modal/Modal';
+import { GlobalStyle } from './GlobalStyles';
+import { Loader } from './Loader/Loader';
 
 export class App extends Component {
   state = {
@@ -100,24 +101,30 @@ export class App extends Component {
   render() {
     const { status, images, isModal, currentImage, error } = this.state;
     return (
-      <Container>
-        <Searchbar onSearch={this.onSearchHandle} />
-        {status === 'done' && (
-          <>
-            <ImageGallery images={images} onClick={this.onGalleryClickHandle} />
-            <Button onClick={this.onLoadMoreHandle}>Load more</Button>
-          </>
-        )}
-        {status === 'pending' && <Loader width="200" color="#4fa94d" />}
-        {isModal && (
-          <Modal
-            imageUrl={currentImage.largeImageURL}
-            alt={currentImage.tags}
-            onCloseModal={this.onCloseModal}
-          />
-        )}
-        {status === 'error' && <p>{error}</p>}
-      </Container>
+      <>
+        <Container>
+          <Searchbar onSubmit={this.onSearchHandle} />
+          {status === 'done' && (
+            <>
+              <ImageGallery
+                images={images}
+                onClick={this.onGalleryClickHandle}
+              />
+              <Button onClick={this.onLoadMoreHandle}>Load more</Button>
+            </>
+          )}
+          {status === 'pending' && <Loader />}
+          {isModal && (
+            <Modal
+              imageUrl={currentImage.largeImageURL}
+              alt={currentImage.tags}
+              onCloseModal={this.onCloseModal}
+            />
+          )}
+          {status === 'error' && <p>{error}</p>}
+        </Container>
+        <GlobalStyle />
+      </>
     );
   }
 }

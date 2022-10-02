@@ -1,4 +1,5 @@
 import { Formik } from 'formik';
+import PropTypes from 'prop-types';
 import {
   Header,
   StyledForm,
@@ -8,9 +9,9 @@ import {
 } from './Searchbar.styled';
 import { AiOutlineSearch as SearchIcon } from 'react-icons/ai';
 
-export const Searchbar = ({ onSearch }) => {
+export const Searchbar = ({ onSubmit }) => {
   const handleSubmit = (values, { resetForm }) => {
-    onSearch(values.searchQuery);
+    onSubmit(values.searchQuery);
     resetForm();
   };
   return (
@@ -37,4 +38,8 @@ export const Searchbar = ({ onSearch }) => {
       </Formik>
     </Header>
   );
+};
+
+Searchbar.propTypes = {
+  onSubmit: PropTypes.func.isRequired,
 };
