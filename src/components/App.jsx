@@ -12,6 +12,7 @@ export class App extends Component {
   state = {
     query: '',
     pageNumber: 1,
+    totalPages: 0,
     status: 'idle',
     images: [],
     isModal: false,
@@ -20,17 +21,37 @@ export class App extends Component {
   };
 
   componentDidUpdate(_, prevState) {
-    const { query, pageNumber, isModal } = this.state;
+    const { query, pageNumber } = this.state;
     const currentQuery = query;
     const currentPage = pageNumber;
-    if (prevState.query !== currentQuery) {
-      this.setState({ pageNumber: 1, status: 'pending' });
+
+    if (
+      prevState.query !== currentQuery ||
+      prevState.pageNumber !== currentPage
+    ) {
+      this.setState({ status: 'pending' });
       getImages(currentQuery, currentPage)
-        .then(response => {
-          if (response.length === 0) {
+        .then(data => {
+          if (data.hits.length === 0) {
             return Promise.reject(new Error(`Cannot find ${currentQuery}`));
           }
-          this.setState({ images: response });
+          const totalPages = Math.ceil(data.totalHits / 12);
+
+          const requiredHits = data.hits.map(
+            ({ id, webformatURL, largeImageURL, tags }) => {
+              return { id, webformatURL, largeImageURL, tags };
+            }
+          );
+          if (currentPage > 1) {
+            this.setState(prevState => {
+              return {
+                images: [...prevState.images, ...requiredHits],
+                totalPages: totalPages,
+              };
+            });
+          } else {
+            this.setState({ images: requiredHits, totalPages: totalPages });
+          }
         })
         .then(() => {
           this.setState({ status: 'done', error: '' });
@@ -40,45 +61,10 @@ export class App extends Component {
         });
       return;
     }
-    if (prevState.pageNumber !== currentPage) {
-      this.setState({ status: 'pending' });
-      getImages(currentQuery, currentPage)
-        .then(response => {
-          if (response.length === 0) {
-            return Promise.reject(new Error(`Cannot find ${currentQuery}`));
-          }
-          this.setState(prevState => {
-            return {
-              images: [...prevState.images, ...response],
-            };
-          });
-        })
-        .then(() => {
-          this.setState({ status: 'done' });
-        })
-        .catch(error => {
-          this.setState({ status: 'error', error: error.message });
-        });
-      return;
-    }
-    if (isModal) {
-      document.addEventListener('keydown', this.onEscHandle);
-      return;
-    }
-    if (!isModal) {
-      document.removeEventListener('keydown', this.onEscHandle);
-      return;
-    }
   }
 
-  onEscHandle = event => {
-    if (event.code === 'Escape') {
-      this.onCloseModal();
-    }
-  };
-
   onSearchHandle = value => {
-    this.setState({ query: value });
+    this.setState({ query: value, pageNumber: 1 });
   };
 
   onLoadMoreHandle = () => {
@@ -99,20 +85,26 @@ export class App extends Component {
   };
 
   render() {
-    const { status, images, isModal, currentImage, error } = this.state;
+    const {
+      status,
+      images,
+      isModal,
+      currentImage,
+      error,
+      totalPages,
+      pageNumber,
+    } = this.state;
     return (
       <>
         <Container>
           <Searchbar onSubmit={this.onSearchHandle} />
           {status === 'done' && (
-            <>
-              <ImageGallery
-                images={images}
-                onClick={this.onGalleryClickHandle}
-              />
-              <Button onClick={this.onLoadMoreHandle}>Load more</Button>
-            </>
+            <ImageGallery images={images} onClick={this.onGalleryClickHandle} />
           )}
+          {totalPages > pageNumber && (
+            <Button onClick={this.onLoadMoreHandle}>Load more</Button>
+          )}
+
           {status === 'pending' && <Loader />}
           {isModal && (
             <Modal

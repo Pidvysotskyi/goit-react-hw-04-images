@@ -4,17 +4,11 @@ import PropTypes from 'prop-types';
 
 export const ImageGallery = ({ images, onClick }) => {
   return (
-    <Gallery
-      onClick={event => {
-        if (event.target.nodeName !== 'IMG') {
-          return;
-        }
-        onClick(event.target.id);
-      }}
-    >
+    <Gallery>
       {images.map((item, index) => {
         return (
           <ImageGalleryItem
+            onClick={onClick}
             key={item.id}
             imageUrl={item.webformatURL}
             alt={item.tags}
@@ -35,4 +29,5 @@ ImageGallery.propTypes = {
       webformatURL: PropTypes.string.isRequired,
     })
   ),
+  onClick: PropTypes.func.isRequired,
 };
