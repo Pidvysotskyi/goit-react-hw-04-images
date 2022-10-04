@@ -42,16 +42,12 @@ export class App extends Component {
               return { id, webformatURL, largeImageURL, tags };
             }
           );
-          if (currentPage > 1) {
-            this.setState(prevState => {
-              return {
-                images: [...prevState.images, ...requiredHits],
-                totalPages: totalPages,
-              };
-            });
-          } else {
-            this.setState({ images: requiredHits, totalPages: totalPages });
-          }
+          this.setState(prevState => {
+            return {
+              images: [...prevState.images, ...requiredHits],
+              totalPages: totalPages,
+            };
+          });
         })
         .then(() => {
           this.setState({ status: 'done', error: '' });
@@ -64,7 +60,7 @@ export class App extends Component {
   }
 
   onSearchHandle = value => {
-    this.setState({ query: value, pageNumber: 1 });
+    this.setState({ query: value, pageNumber: 1, images: [] });
   };
 
   onLoadMoreHandle = () => {
@@ -98,7 +94,7 @@ export class App extends Component {
       <>
         <Container>
           <Searchbar onSubmit={this.onSearchHandle} />
-          {status === 'done' && (
+          {images.length !== 0 && (
             <ImageGallery images={images} onClick={this.onGalleryClickHandle} />
           )}
           {totalPages > pageNumber && (

@@ -8,6 +8,7 @@ export const Header = styled.header`
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 1100;
   min-height: 64px;
   padding-right: 24px;
   padding-left: 24px;
